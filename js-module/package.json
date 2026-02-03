@@ -1,0 +1,30 @@
+{
+  "name": "qa-enterprise-suite-js",
+  "version": "1.0.0",
+  "description": "JavaScript testing module for QA Enterprise Suite",
+  "private": true,
+  "workspaces": [
+    "playwright",
+    "nightwatch"
+  ],
+  "scripts": {
+    "test:playwright": "npm run test --workspace=playwright",
+    "test:playwright:headed": "npm run test:headed --workspace=playwright",
+    "test:playwright:debug": "npm run test:debug --workspace=playwright",
+    "test:playwright:ui": "npm run test:ui --workspace=playwright",
+    "test:nightwatch": "npm run test --workspace=nightwatch",
+    "lint": "eslint . --ext .ts,.js",
+    "format": "prettier --write .",
+    "install:browsers": "npx playwright install"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

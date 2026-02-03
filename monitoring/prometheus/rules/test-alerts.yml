@@ -1,0 +1,129 @@
+groups:
+  - name: test-quality-alerts
+    rules:
+      # Alert when pass rate drops below threshold
+      - alert: LowTestPassRate
+        expr: (test_passed_total / test_total) * 100 < 90
+        for: 5m
+        labels:
+          severity: warning
+          team: qa
+        annotations:
+          summary: "Test pass rate below 90%"
+          description: "Current pass rate is {{ $value | printf \"%.1f\" }}%. Expected at least 90%."
+
+      # Alert when pass rate is critically low
+      - alert: CriticalTestPassRate
+        expr: (test_passed_total / test_total) * 100 < 70
+        for: 2m
+        labels:
+          severity: critical
+          team: qa
+        annotations:
+          summary: "Critical: Test pass rate below 70%"
+          description: "Current pass rate is {{ $value | printf \"%.1f\" }}%. Immediate attention required."
+
+      # Alert on high flaky test rate
+      - alert: HighFlakyTestRate
+        expr: test_flaky_rate > 10
+        for: 10m
+        labels:
+          severity: warning
+          team: qa
+        annotations:
+          summary: "High flaky test rate detected"
+          description: "Flaky test rate is {{ $value | printf \"%.1f\" }}%. Consider investigating unstable tests."
+
+      # Alert on test execution time increase
+      - alert: SlowTestExecution
+        expr: test_execution_duration_ms > 600000
+        for: 5m
+        labels:
+          severity: warning
+          team: qa
+        annotations:
+          summary: "Test execution taking too long"
+          description: "Test execution time is {{ $value | humanizeDuration }}. Threshold is 10 minutes."
+
+  - name: performance-alerts
+    rules:
+      # Alert on high API response time
+      - alert: HighAPIResponseTime
+        expr: api_response_time_ms{quantile="0.95"} > 5000
+        for: 5m
+        labels:
+          severity: warning
+          team: qa
+        annotations:
+          summary: "High API response time"
+          description: "95th percentile response time for {{ $labels.endpoint }} is {{ $value }}ms."
+
+      # Alert on high error rate during load test
+      - alert: HighErrorRate
+        expr: jmeter_error_rate > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          team: qa
+        annotations:
+          summary: "High error rate during performance test"
+          description: "Error rate is {{ $value | printf \"%.2f\" }}%. Threshold is 1%."
+
+      # Alert on low throughput
+      - alert: LowThroughput
+        expr: jmeter_throughput < 50
+        for: 5m
+        labels:
+          severity: warning
+          team: qa
+        annotations:
+          summary: "Low throughput detected"
+          description: "Current throughput is {{ $value }} req/s. Expected at least 50 req/s."
+
+  - name: infrastructure-alerts
+    rules:
+      # Alert when Selenium Grid has no available nodes
+      - alert: NoSeleniumNodes
+        expr: selenium_grid_available_nodes == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: infra
+        annotations:
+          summary: "No Selenium Grid nodes available"
+          description: "All Selenium Grid nodes are busy or offline."
+
+      # Alert on high Selenium Grid queue
+      - alert: HighSeleniumQueueSize
+        expr: selenium_grid_queue_size > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: infra
+        annotations:
+          summary: "High Selenium Grid queue size"
+          description: "{{ $value }} tests waiting in queue. Consider scaling grid nodes."
+
+  - name: ai-feature-alerts
+    rules:
+      # Alert when self-healing success rate drops
+      - alert: LowSelfHealingSuccessRate
+        expr: (self_healing_success_count / self_healing_attempt_count) * 100 < 50
+        for: 15m
+        labels:
+          severity: warning
+          team: qa
+        annotations:
+          summary: "Self-healing success rate low"
+          description: "Self-healing success rate is {{ $value | printf \"%.1f\" }}%. Review locator strategies."
+
+      # Alert on high number of self-healing attempts
+      - alert: HighSelfHealingAttempts
+        expr: increase(self_healing_attempt_count[1h]) > 50
+        for: 5m
+        labels:
+          severity: warning
+          team: qa
+        annotations:
+          summary: "High self-healing activity"
+          description: "{{ $value }} self-healing attempts in the last hour. Check for UI changes."

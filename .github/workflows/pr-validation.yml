@@ -1,0 +1,167 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+env:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '18'
+
+jobs:
+  # Detect changed files
+  changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      java: ${{ steps.filter.outputs.java }}
+      js: ${{ steps.filter.outputs.js }}
+      docs: ${{ steps.filter.outputs.docs }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Detect file changes
+        id: filter
+        uses: dorny/paths-filter@v2
+        with:
+          filters: |
+            java:
+              - 'java-module/**'
+            js:
+              - 'js-module/**'
+            docs:
+              - 'docs/**'
+              - '*.md'
+
+  # Java Validation
+  java-validation:
+    name: Java Validation
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.java == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Validate build
+        working-directory: java-module
+        run: mvn clean compile -B
+
+      - name: Run affected tests
+        working-directory: java-module
+        run: mvn test -Dgroups=smoke -Dheadless=true -B
+        continue-on-error: true
+
+      - name: Post test results
+        if: always()
+        uses: dorny/test-reporter@v1
+        with:
+          name: Java Test Results
+          path: 'java-module/**/target/surefire-reports/*.xml'
+          reporter: java-junit
+
+  # JavaScript Validation
+  js-validation:
+    name: JavaScript Validation
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.js == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: js-module/package-lock.json
+
+      - name: Install dependencies
+        working-directory: js-module
+        run: npm ci || npm install
+
+      - name: Type check
+        working-directory: js-module/playwright
+        run: npx tsc --noEmit || true
+
+      - name: Lint
+        working-directory: js-module
+        run: npm run lint || true
+
+      - name: Install Playwright browsers
+        working-directory: js-module/playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Run smoke tests
+        working-directory: js-module/playwright
+        run: npx playwright test --grep @smoke --project=chromium
+        continue-on-error: true
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-pr-results
+          path: js-module/playwright/playwright-report
+          retention-days: 7
+
+  # Documentation validation
+  docs-validation:
+    name: Documentation Validation
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check markdown links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          config-file: '.github/markdown-link-check.json'
+        continue-on-error: true
+
+  # PR Summary
+  summary:
+    name: PR Summary
+    runs-on: ubuntu-latest
+    needs: [changes, java-validation, js-validation, docs-validation]
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## PR Validation Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changes Detected" >> $GITHUB_STEP_SUMMARY
+          echo "- Java: ${{ needs.changes.outputs.java }}" >> $GITHUB_STEP_SUMMARY
+          echo "- JavaScript: ${{ needs.changes.outputs.js }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Documentation: ${{ needs.changes.outputs.docs }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Validation Results" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ needs.changes.outputs.java }}" == "true" ]; then
+            echo "| Java Validation | ${{ needs.java-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.changes.outputs.js }}" == "true" ]; then
+            echo "| JS Validation | ${{ needs.js-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+          fi
+          if [ "${{ needs.changes.outputs.docs }}" == "true" ]; then
+            echo "| Docs Validation | ${{ needs.docs-validation.result }} |" >> $GITHUB_STEP_SUMMARY
+          fi

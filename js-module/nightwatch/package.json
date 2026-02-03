@@ -1,0 +1,46 @@
+{
+  "name": "@qa-enterprise-suite/nightwatch",
+  "version": "1.0.0",
+  "description": "Nightwatch E2E tests for QA Enterprise Suite",
+  "main": "index.js",
+  "scripts": {
+    "test": "nightwatch",
+    "test:chrome": "nightwatch --env chrome",
+    "test:chrome:headless": "nightwatch --env chrome.headless",
+    "test:firefox": "nightwatch --env firefox",
+    "test:firefox:headless": "nightwatch --env firefox.headless",
+    "test:coverage": "nyc --reporter=html --reporter=text nightwatch",
+    "test:ui": "nightwatch tests/ui",
+    "test:api": "nightwatch tests/api",
+    "report:coverage": "nyc report --reporter=html"
+  },
+  "dependencies": {
+    "nightwatch": "^3.4.0",
+    "chromedriver": "^121.0.0",
+    "geckodriver": "^4.3.0",
+    "selenium-server": "^4.18.0"
+  },
+  "devDependencies": {
+    "@types/nightwatch": "^2.3.30",
+    "nyc": "^15.1.0"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.js"
+    ],
+    "exclude": [
+      "tests/**/*"
+    ],
+    "reporter": [
+      "text",
+      "html",
+      "lcov"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "lines": 60,
+    "functions": 60,
+    "branches": 50,
+    "statements": 60
+  }
+}

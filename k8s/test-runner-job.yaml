@@ -1,0 +1,142 @@
+# Kubernetes Job for running automated tests
+# Deploy with: kubectl apply -f test-runner-job.yaml
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qa-test-runner
+  namespace: qa-automation
+  labels:
+    app: test-runner
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      labels:
+        app: test-runner
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: test-runner
+          image: maven:3.9-eclipse-temurin-17
+          command:
+            - /bin/bash
+            - -c
+            - |
+              cd /workspace
+              mvn clean test -Dgroups=smoke -Dheadless=true -Dgrid.url=$GRID_URL
+              mvn allure:report
+          env:
+            - name: GRID_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: test-config
+                  key: GRID_URL
+            - name: HEADLESS
+              valueFrom:
+                configMapKeyRef:
+                  name: test-config
+                  key: HEADLESS
+            - name: PARALLEL_THREADS
+              valueFrom:
+                configMapKeyRef:
+                  name: test-config
+                  key: PARALLEL_THREADS
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1000m"
+            limits:
+              memory: "4Gi"
+              cpu: "2000m"
+          volumeMounts:
+            - name: test-workspace
+              mountPath: /workspace
+            - name: test-results
+              mountPath: /workspace/target
+      volumes:
+        - name: test-workspace
+          persistentVolumeClaim:
+            claimName: test-workspace-pvc
+        - name: test-results
+          persistentVolumeClaim:
+            claimName: test-results-pvc
+
+---
+# PVC for test workspace
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-workspace-pvc
+  namespace: qa-automation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: standard
+
+---
+# PVC for test results
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: test-results-pvc
+  namespace: qa-automation
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  storageClassName: standard
+
+---
+# CronJob for nightly regression tests
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: nightly-regression
+  namespace: qa-automation
+spec:
+  schedule: "0 2 * * *"  # 2 AM daily
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: regression-runner
+              image: maven:3.9-eclipse-temurin-17
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  cd /workspace
+                  mvn clean test -Dgroups=regression -Dheadless=true -Dgrid.url=$GRID_URL
+                  mvn allure:report
+              env:
+                - name: GRID_URL
+                  valueFrom:
+                    configMapKeyRef:
+                      name: test-config
+                      key: GRID_URL
+              resources:
+                requests:
+                  memory: "4Gi"
+                  cpu: "2000m"
+                limits:
+                  memory: "8Gi"
+                  cpu: "4000m"
+              volumeMounts:
+                - name: test-workspace
+                  mountPath: /workspace
+          volumes:
+            - name: test-workspace
+              persistentVolumeClaim:
+                claimName: test-workspace-pvc

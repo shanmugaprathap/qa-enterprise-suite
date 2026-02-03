@@ -1,0 +1,118 @@
+version: '3.8'
+
+# Selenium Grid 4 Docker Compose Configuration
+# Access Hub at: http://localhost:4444
+
+services:
+  # Selenium Hub
+  selenium-hub:
+    image: selenium/hub:4.18.1
+    container_name: selenium-hub
+    ports:
+      - "4442:4442"
+      - "4443:4443"
+      - "4444:4444"
+    environment:
+      - SE_SESSION_REQUEST_TIMEOUT=300
+      - SE_SESSION_RETRY_INTERVAL=2
+      - SE_NODE_MAX_SESSIONS=5
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4444/wd/hub/status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Chrome Node
+  chrome:
+    image: selenium/node-chrome:4.18.1
+    container_name: selenium-chrome
+    shm_size: 2gb
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=3
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_VNC_NO_PASSWORD=1
+      - SE_SCREEN_WIDTH=1920
+      - SE_SCREEN_HEIGHT=1080
+    ports:
+      - "7900:7900"  # noVNC port for debugging
+    volumes:
+      - /dev/shm:/dev/shm
+
+  # Firefox Node
+  firefox:
+    image: selenium/node-firefox:4.18.1
+    container_name: selenium-firefox
+    shm_size: 2gb
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=3
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_VNC_NO_PASSWORD=1
+      - SE_SCREEN_WIDTH=1920
+      - SE_SCREEN_HEIGHT=1080
+    ports:
+      - "7901:7900"
+    volumes:
+      - /dev/shm:/dev/shm
+
+  # Edge Node
+  edge:
+    image: selenium/node-edge:4.18.1
+    container_name: selenium-edge
+    shm_size: 2gb
+    depends_on:
+      selenium-hub:
+        condition: service_healthy
+    environment:
+      - SE_EVENT_BUS_HOST=selenium-hub
+      - SE_EVENT_BUS_PUBLISH_PORT=4442
+      - SE_EVENT_BUS_SUBSCRIBE_PORT=4443
+      - SE_NODE_MAX_SESSIONS=3
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
+      - SE_VNC_NO_PASSWORD=1
+      - SE_SCREEN_WIDTH=1920
+      - SE_SCREEN_HEIGHT=1080
+    ports:
+      - "7902:7900"
+    volumes:
+      - /dev/shm:/dev/shm
+
+  # Chrome Video Recording (optional)
+  chrome-video:
+    image: selenium/video:ffmpeg-6.1-20240123
+    container_name: selenium-chrome-video
+    depends_on:
+      - chrome
+    environment:
+      - DISPLAY_CONTAINER_NAME=chrome
+      - SE_VIDEO_FILE_NAME=chrome_video
+    volumes:
+      - ./videos:/videos
+
+  # Firefox Video Recording (optional)
+  firefox-video:
+    image: selenium/video:ffmpeg-6.1-20240123
+    container_name: selenium-firefox-video
+    depends_on:
+      - firefox
+    environment:
+      - DISPLAY_CONTAINER_NAME=firefox
+      - SE_VIDEO_FILE_NAME=firefox_video
+    volumes:
+      - ./videos:/videos
+
+networks:
+  default:
+    name: selenium-grid

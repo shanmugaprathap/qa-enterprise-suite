@@ -1,0 +1,63 @@
+# Prometheus Configuration for QA Metrics Collection
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'qa-enterprise-suite'
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Rule files
+rule_files:
+  - /etc/prometheus/rules/*.yml
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # JMeter metrics from Backend Listener
+  - job_name: 'jmeter'
+    static_configs:
+      - targets: ['jmeter-influxdb-listener:9270']
+    metrics_path: /metrics
+    scrape_interval: 5s
+
+  # Selenium Grid metrics
+  - job_name: 'selenium-grid'
+    static_configs:
+      - targets: ['selenium-hub:4444']
+    metrics_path: /wd/hub/status
+    scrape_interval: 30s
+
+  # Test results exporter (custom)
+  - job_name: 'test-results'
+    static_configs:
+      - targets: ['test-metrics-exporter:8080']
+    metrics_path: /metrics
+    scrape_interval: 60s
+
+  # Application under test (if instrumented)
+  - job_name: 'application'
+    static_configs:
+      - targets: ['app:8080']
+    metrics_path: /actuator/prometheus
+    scrape_interval: 15s
+
+  # Node exporter for system metrics
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # Pushgateway for batch job metrics
+  - job_name: 'pushgateway'
+    honor_labels: true
+    static_configs:
+      - targets: ['pushgateway:9091']

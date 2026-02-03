@@ -1,0 +1,143 @@
+# Compiled class files
+*.class
+
+# Log files
+*.log
+
+# Package files
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE - IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# IDE - Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.npm
+.yarn-integrity
+
+# Playwright
+playwright-report/
+playwright/.cache/
+test-results/
+
+# Nightwatch
+nightwatch/reports/
+nightwatch/logs/
+
+# Test results and reports
+allure-results/
+allure-report/
+test-output/
+surefire-reports/
+cucumber-reports/
+screenshots/
+
+# JMeter
+performance/jmeter/*.jtl
+performance/jmeter/*.csv
+performance/jmeter/reports/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# Credentials (never commit)
+**/credentials.json
+**/secrets.json
+**/*-key.json
+**/*.pem
+**/*.key
+
+# Report Portal
+reportportal.properties.local
+
+# Docker
+docker-compose.override.yml
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+dist/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Chrome/Firefox profiles for testing
+chrome-profile/
+firefox-profile/
+
+# Appium
+*.app
+*.apk
+*.ipa

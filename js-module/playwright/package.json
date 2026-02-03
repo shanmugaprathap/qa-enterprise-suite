@@ -1,0 +1,51 @@
+{
+  "name": "@qa-enterprise-suite/playwright",
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for QA Enterprise Suite",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "test:coverage": "nyc --reporter=html --reporter=text playwright test",
+    "report": "playwright show-report",
+    "report:coverage": "nyc report --reporter=html",
+    "codegen": "playwright codegen",
+    "install:browsers": "playwright install"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.42.0",
+    "dotenv": "^16.4.5",
+    "openai": "^4.28.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.24",
+    "typescript": "^5.3.3",
+    "nyc": "^15.1.0",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2"
+  },
+  "nyc": {
+    "extends": "@istanbuljs/nyc-config-typescript",
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "tests/**/*",
+      "**/*.d.ts"
+    ],
+    "reporter": [
+      "text",
+      "html",
+      "lcov"
+    ],
+    "all": true,
+    "check-coverage": true,
+    "branches": 60,
+    "lines": 70,
+    "functions": 70,
+    "statements": 70
+  }
+}
