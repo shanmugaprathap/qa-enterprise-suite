@@ -415,6 +415,8 @@ public class TestAnalyticsEngine {
 
     @Data
     @Builder
+    @lombok.NoArgsConstructor
+    @lombok.AllArgsConstructor
     public static class QualityMetrics {
         private int totalTests;
         private int totalExecutions;
