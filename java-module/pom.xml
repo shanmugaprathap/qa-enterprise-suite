@@ -47,7 +47,7 @@
 
         <!-- Reporting -->
         <allure.version>2.25.0</allure.version>
-        <reportportal.version>5.2.4</reportportal.version>
+        <reportportal.version>5.1.0</reportportal.version>
 
         <!-- AI/Self-Healing -->
         <healenium.version>3.4.4</healenium.version>
@@ -73,6 +73,13 @@
         <pitest.version>1.15.8</pitest.version>
         <pact.version>4.6.7</pact.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
 
     <dependencyManagement>
         <dependencies>

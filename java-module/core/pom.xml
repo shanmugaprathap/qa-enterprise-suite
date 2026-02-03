@@ -40,16 +40,6 @@
             <artifactId>allure-testng</artifactId>
         </dependency>
 
-        <!-- Report Portal -->
-        <dependency>
-            <groupId>com.epam.reportportal</groupId>
-            <artifactId>agent-java-testng</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.epam.reportportal</groupId>
-            <artifactId>client-java</artifactId>
-        </dependency>
-
         <!-- Healenium -->
         <dependency>
             <groupId>com.epam.healenium</groupId>
