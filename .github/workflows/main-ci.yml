@@ -37,7 +37,7 @@ jobs:
 
       - name: Run smoke tests
         working-directory: java-module
-        run: mvn test -Dgroups=smoke -B
+        run: mvn test -Dgroups=smoke -Dheadless=true -B
         continue-on-error: true
 
       - name: Generate Allure results
