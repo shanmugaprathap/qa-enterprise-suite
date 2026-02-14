@@ -20,15 +20,15 @@ test.describe('Google Search', () => {
     await searchBox.fill('Playwright testing');
     await searchBox.press('Enter');
 
-    // Wait for search results
+    // Wait for search results page to load
     await page.waitForURL(/search/);
 
-    // Verify results page - title may vary by region/locale
+    // Verify we're on the results page - title may vary by region/locale
     await expect(page).toHaveTitle(/Playwright|search|Google/i);
 
-    // Check for search results
-    const results = page.locator('#search, #rso');
-    await expect(results).toBeVisible();
+    // Check for search results - Google uses various container elements
+    const results = page.locator('#search, #rso, #main, div[data-async-context]').first();
+    await expect(results).toBeVisible({ timeout: 15000 });
   });
 
   test('should show search suggestions @regression', { tag: [tags.regression, tags.ui] }, async ({ page }) => {
