@@ -36,7 +36,7 @@ public class ConsumerContractTest {
     @Pact(consumer = "QATestSuite")
     public RequestResponsePact getUserByIdPact(PactDslWithProvider builder) {
         DslPart responseBody = new PactDslJsonBody()
-                .integerType("id", 1)
+                .integerType("id", 1L)
                 .stringType("username", "testuser")
                 .stringType("email", "test@example.com")
                 .stringType("firstName", "Test")
@@ -106,19 +106,19 @@ public class ConsumerContractTest {
         DslPart responseBody = new PactDslJsonBody()
                 .array("users")
                     .object()
-                        .integerType("id", 1)
+                        .integerType("id", 1L)
                         .stringType("username", "user1")
                         .stringType("email", "user1@example.com")
                     .closeObject()
                     .object()
-                        .integerType("id", 2)
+                        .integerType("id", 2L)
                         .stringType("username", "user2")
                         .stringType("email", "user2@example.com")
                     .closeObject()
                 .closeArray()
-                .integerType("total", 2)
-                .integerType("page", 1)
-                .integerType("pageSize", 10);
+                .integerType("total", 2L)
+                .integerType("page", 1L)
+                .integerType("pageSize", 10L);
 
         return builder
                 .given("multiple users exist in the system")
@@ -143,7 +143,7 @@ public class ConsumerContractTest {
         DslPart responseBody = new PactDslJsonBody()
                 .stringValue("error", "Not Found")
                 .stringValue("message", "User not found")
-                .integerValue("statusCode", 404)
+                .numberValue("statusCode", 404)
                 .stringType("timestamp");
 
         return builder
@@ -169,7 +169,7 @@ public class ConsumerContractTest {
                 .stringType("lastName", "Name");
 
         DslPart responseBody = new PactDslJsonBody()
-                .integerValue("id", 1)
+                .numberValue("id", 1)
                 .stringType("username")
                 .stringType("email")
                 .stringValue("firstName", "Updated")
