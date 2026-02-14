@@ -103,7 +103,11 @@ public class ConsumerContractTest {
      */
     @Pact(consumer = "QATestSuite")
     public RequestResponsePact getUserListPact(PactDslWithProvider builder) {
-        DslPart responseBody = new PactDslJsonBody()
+        PactDslJsonBody body = new PactDslJsonBody()
+                .integerType("total", 2L)
+                .integerType("page", 1L)
+                .integerType("pageSize", 10L);
+        DslPart responseBody = body
                 .array("users")
                     .object()
                         .integerType("id", 1L)
@@ -115,10 +119,7 @@ public class ConsumerContractTest {
                         .stringType("username", "user2")
                         .stringType("email", "user2@example.com")
                     .closeObject()
-                .closeArray()
-                .integerType("total", 2L)
-                .integerType("page", 1L)
-                .integerType("pageSize", 10L);
+                .closeArray();
 
         return builder
                 .given("multiple users exist in the system")
