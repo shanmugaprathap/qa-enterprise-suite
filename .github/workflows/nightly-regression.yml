@@ -78,7 +78,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: js-module/package.json
+          cache-dependency-path: js-module/package-lock.json
 
       - name: Install dependencies
         working-directory: js-module
