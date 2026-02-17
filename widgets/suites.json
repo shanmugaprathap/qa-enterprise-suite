@@ -1,1 +1,1 @@
-{"total":1,"items":[{"uid":"dfb58293170c60e0390d04dbd15d9c24","name":"Google Search Tests - JUnit 5","statistic":{"failed":0,"broken":0,"skipped":0,"passed":2,"unknown":0,"total":2}}]}
+{"total":1,"items":[{"uid":"dfb58293170c60e0390d04dbd15d9c24","name":"Google Search Tests - JUnit 5","statistic":{"failed":0,"broken":1,"skipped":0,"passed":1,"unknown":0,"total":2}}]}
